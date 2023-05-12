@@ -2,6 +2,7 @@ package com.myco.user.model;
 
 
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -14,8 +15,12 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Document(indexName = "userinformation_elasticsearch")
-public class User {
+public class User implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@Id
 	private String id;
 	private String firstName;

@@ -6,8 +6,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.myco.user.client.RecordRepairServiceClient;
 import com.myco.user.model.User;
 import com.myco.user.repository.ElasticSearchQuery;
 
@@ -18,6 +20,9 @@ public class UserESServiceImpl implements UserESService {
 	
 	@Autowired
 	private ElasticSearchQuery elasticSearchQuery;
+	
+	@Autowired
+	private RecordRepairServiceClient repairServiceClient;
 	
 	@Override
 	public List<User> getAllDocuments() {
@@ -46,6 +51,11 @@ public class UserESServiceImpl implements UserESService {
 		} catch (Exception e) {
 			LOGGER.error(">>>> error on saveUser() <<<< Exception : {} " , e.getMessage());
 			LOGGER.info(">>>> calling record-repair-service >>>>");
+			ResponseEntity<String> response = repairServiceClient.storeUserToRepairService(user, "/repair");
+			if(null!=response && response.hasBody()) {
+				LOGGER.info("<<<< 'record-repair-service' <<<< Response : {} ", response.getBody());
+				return response.getBody();
+			}			
 		}
 		return null;
 	}
@@ -64,7 +74,7 @@ public class UserESServiceImpl implements UserESService {
 
 	@Override
 	public User updateUser(String id) {
-		LOGGER.info(">>>> deleteUser() , id : {} " , id);
+		LOGGER.info(">>>> updateUser() , id : {} " , id);
 		try {
 			User user =  elasticSearchQuery.getDocumentById(id);
 			if(null != user) {
@@ -72,7 +82,7 @@ public class UserESServiceImpl implements UserESService {
 				return user;
 			}
 		} catch (Exception e) {
-			LOGGER.error(">>>> error on deleteUser() <<<< Exception : {} " , e.getMessage());
+			LOGGER.error(">>>> error on updateUser() <<<< Exception : {} " , e.getMessage());
 			
 		}
 		return null;
